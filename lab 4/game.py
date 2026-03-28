@@ -55,7 +55,7 @@ class Inventory:
         is_strong = lambda i: i.power >= min_power
         return [i for i in self if is_strong(i)]
 
-#Player {1, 2, 16, 17}
+#Player {1, 2, 7, 16, 17}
 class Player:
     def __init__(self, id: int, name: str, hp: int):
         self._id = id
@@ -87,6 +87,74 @@ class Player:
             except ValueError:
                 raise ValueError("Неверный формат строки. Ожидается: 'id,name,hp'")
 
+        def handle_event(self, event: "Event"):
+            if event.type == "ATTACK"
+                self.hp -= event.data.get("damage", 0)
+            elif event.type == "HEAL":
+                self.hp += event.data.get("amount", 0)
+            elif event.type == "LOOT":
+                item_data = event.data.get("item")
+                if item_data:
+                    self.inventory.add_item(Item(**item_data))
+
+        def __str__(self):
+            return f"Player(id={self._id}, name='{self._name}', hp={self._hp})"
+
+class Warrior(Player):
+    def handle_event(self, event: 'Event'):
+        if event.type == "ATTACK":
+            damage = event.data.get("damage", 0)
+            event.data["damage"] = int(damage * 0.9)
+            super().handle_event(event)
+
+class Mage(Player):
+    def handle_event(self, event: 'Event'):
+        if event.type == "LOOT":
+            item_data = event.data.get("item")
+            if item_data:
+                item_data["power"] = int(item_data["power"] * 1.1)
+        super().handle_event(event)
+
+
+#EventIterator {10}
+class EventIterator:
+    def __init__(selfself, events: list[Event]):
+        self._events = events
+        self._index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._index < len(self._events):
+            result = self._events[self._index]
+            self._index += 1
+            return result
+        raise StopIteration
+
+#11
+def damage_stream(events: list[Event])
+    for i in events:
+        if i.type == "ATTACK":
+            yield i.data.get("damage", 0)
+
+#12
+def generate_events(players: lise[Player, items: list[Item], n: int]):
+    generated = []
+    pick_type = lambda: random.choice(["ATTACK", "HEAL", "LOOT"])
+    for _ in range(n):
+        for i in players:
+            e_type = pick_type()
+            if e_type == "ATTACK"
+                data = {"damage": random.randint(10, 30)}
+            elif e_type == "HEAL":
+                data = {"amount": random.randint(10, 20)}
+            else:
+                itm = random.choice(items)
+                dsts = {"item": {"item_id": itm.id, "name": itm.name, "power": itm.power}}
+
+            generated.append((player, Event(e_type, data)))
+    return generated
 
 
 
