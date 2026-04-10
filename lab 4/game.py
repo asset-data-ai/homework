@@ -7,22 +7,18 @@ from flask import Flask, jsonify
 
 app = Flask(__name__)
 
-
 #3
 class Item:
     def __init__(self, id: int, name: str, power: int):
         self.id = id
         self.name = name
         self.power = power
-
     def __hash__(self):
         return hash(self.id)
-
     def __eq__(self, other):
         if isinstance(other, Item):
             return self.id == other.id
         return False
-
     def __str__(self):
         return f"Item(id={self.id}, name='{self.name}', power={self.power})"
 
@@ -30,26 +26,19 @@ class Item:
 class Inventory:
     def __init__(self):
         self._items: list[Item] = []
-
     def add_item(self, item: Item):
         if item not in self._items:
             self._items.append(item)
-
     def remove_item(self, id: int):
         self._items = [i for i in self._items if i.id != id]
-
     def get_items(self):
         return self._items
-
     def unique_items(self):
         return set(self._items)
-
     def to_dict(self):
         return {i.id: i for i in self._items}
-
     def __iter__(self):
         return iter(self._items)
-
     def get_strong_items(self, min_power: int):
         is_strong = lambda i: i.power >= min_power
         return [i for i in self if is_strong(i)]
@@ -61,28 +50,22 @@ class Player:
         self._name = name.strip().title()
         self._hp = max(0, hp)
         self._inventory = Inventory()
-
     @property
     def hp(self):
         return self._hp
-
     @hp.setter
     def hp(self, value):
         self._hp = max(0, value)
-
     @property
     def inventory(self):
         return self._inventory
-
     @property
     def id(self):
         return self._id
-
     @classmethod
     def from_string(cls, data):
         p_id, p_name, p_hp = map(str.strip, data.split(','))
         return cls(p_id, p_name, int(p_hp))
-
     def handle_event(self, event: "Event"):
         if event.type == "ATTACK":
             self.hp -= event.data.get("damage", 0)
@@ -92,10 +75,8 @@ class Player:
             item_data = event.data.get("item")
             if item_data:
                 self.inventory.add_item(Item(id=item_data["item_id"], name=item_data["name"], power=item_data["power"]))
-
     def __str__(self):
         return f"Player(id={self._id}, name='{self._name}', hp={self._hp})"
-
     def __del__(self):
         print(f"Player {self._name} удалён")
 
@@ -121,7 +102,6 @@ class Event:
         self.type = type
         self.data = data
         self.timestamp = timestamp or datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
     def __str__(self):
         return f"Event(type='{self.type}', data={self.data}, timestamp='{self.timestamp}')"
 
@@ -132,7 +112,6 @@ class Logger:
         with open(filename, "a", encoding="utf-8") as f:
             data_str = json.dumps(event.data)
             f.write(f"{event.timestamp};{player.id};{event.type};{data_str}\n")
-
     @staticmethod
     def read_logs(filename: str) -> list[Event]:
         events = []
@@ -150,10 +129,8 @@ class EventIterator:
     def __init__(self, events: list[Event]):
         self._events = events
         self._index = 0
-
     def __iter__(self):
         return self
-
     def __next__(self):
         if self._index < len(self._events):
             result = self._events[self._index]
@@ -181,7 +158,6 @@ def generate_events(players: list[Player], items: list[Item], n: int):
             else:
                 itm = random.choice(items)
                 dats = {"item": {"item_id": itm.id, "name": itm.name, "power": itm.power}}
-
             generated.append((player, Event(e_type, data)))
     return generated
 
@@ -191,19 +167,15 @@ def analyze_logs(events: list[Event], filename: str):
     with open(filename, "r") as f:
         for line in f:
             raw_logs.append(line.strip().split(";"))
-
     damage_by_player = {}
     total_damage = sum(damage_stream(events))
-
     event_types = [e.type for e in events]
     most_common_event = Counter(event_types).most_common(1)[0][0] if event_types else None
-
     for log in raw_logs:
         if log[2] == "ATTACK":
             p_id = int(log[1])
             dmg = json.loads(log[3]).get("damage", 0)
             damage_by_player[p_id] = damage_by_player.get(p_id, 0) + dmg
-
     top_player = max(damage_by_player, key=damage_by_player.get) if damage_by_player else None
     return {"total_damage": total_damage, "top_player_id": top_player, "most_common_event": most_common_event}
 
@@ -225,55 +197,32 @@ def analyze_inventory(inventories: list[Inventory]) -> dict:
 #20
 @app.route("/sim")
 def run_simulation():
-
     log_file = "game_log.txt"
-    open(log_file, 'w').close()  # Очищаем лог перед новым запуском
-
-    # 1. Создаем базовые данные
-    items = [
-        Item(1, "Excalibur", 100),
+    open(log_file, 'w').close()
+    items = [Item(1, "Excalibur", 100),
         Item(2, "Health Potion", 0),
-        Item(3, "Magic Staff", 80)
-    ]
+        Item(3, "Magic Staff", 80)]
     p1 = Warrior.from_string("1, arthur, 120")
     p2 = Mage(2, "merlin", 90)
     players = [p1, p2]
-
-    # 2. Генерируем события
     simulated_data = generate_events(players, items, 3)
-
     events_history = []
-
-    # 3. Обрабатываем события
     for player, event in simulated_data:
         ai_action = decide_action(player.hp, len(player.inventory.get_items()))
-
         player.handle_event(event)
         Logger.log(event, player, log_file)
-
-        # Записываем историю для вывода в браузер
-        events_history.append({
-            "player": player._name,
+        events_history.append({"player": player._name,
             "ai_wanted_to": ai_action,
             "actual_event": event.type,
-            "event_data": event.data
-        })
-
-    # 4. Собираем результаты игроков
+            "event_data": event.data})
     players_status = []
     for p in players:
-        players_status.append({
-            "name": p._name,
+        players_status.append({"name": p._name,
             "hp": p.hp,
-            "strong_items": [i.name for i in p.inventory.get_strong_items(50)]
-        })
-
-    # 5. Аналитика
+            "strong_items": [i.name for i in p.inventory.get_strong_items(50)]})
     logged_events = Logger.read_logs(log_file)
     log_stats = analyze_logs(logged_events, log_file)
     inv_stats = analyze_inventory([p.inventory for p in players])
-
-    # 6. Возвращаем красивый JSON ответ
     return jsonify({
         "status": "Simulation finished successfully",
         "events_history": events_history,
