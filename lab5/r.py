@@ -125,7 +125,7 @@ class Logger:
 
 @app.post("/task6")
 def task6():
-    log_file = "shop_logs.txt"
+    log_file = "../shop_logs.txt"
     Logger.log_action(user, "VIEW", p3, log_file)
     Logger.log_action(user, "ADD_TO_CART", p3, log_file)
     Logger.log_action(user, "BUY", p3, log_file)
