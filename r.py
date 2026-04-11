@@ -171,7 +171,7 @@ def task8():
     return {"order_id": order.id, "total_items": len(order.products), "top_2_expensive_items": [{"name": p.name, "price": p.price} for p in top_2_expensive]}
 
 
-
+#=============================================================
 #data
 p1 = Product(1, "Laptop", 1200.0, "Electronics")
 p2 = Product(2, "T-Shirt", 20.0, "Clothing")
@@ -181,6 +181,8 @@ p5 = Product(5, "USB Cable", 15.0, "Accessories")
 user = User("66", " Askhat ", "askhat@def.com")
 u1 = User(1,"John Doe","john@example.com")
 u2 = User(2,"Alice","alice@example.com")
+orders_data = [{"order_id": 101, "user_name": "John", "total": 1200}, {"order_id": 102, "user_name": "John", "total": 500}, {"order_id": 103, "user_name": "Alice", "total": 25}]
+#===============================================================
 
 #9
 def price_stream(products: list):
@@ -314,4 +316,190 @@ def task21():
     data = [{"id": u._id, "name": u._name, "email": u._email, "registration_date": current_date} for u in u_list]
     df = pd.DataFrame(data)
     return df.to_dict(orient="records")
+
+#22
+@app.get("/task22")
+def task22():
+    products = [p1, p2, p3]
+    data = [p.to_dict() for p in products]
+    df = pd.DataFrame(data, columns=["id", "name", "category", "price"])
+    return df.to_dict(orient="records")
+
+#23========38
+@app.get("/task23")
+def task23():
+    u_data = [{"id": 1, "name": "John"}, {"id": 2, "name": "Alice"}]
+    users_df = pd.DataFrame(u_data)
+    o_data = [{"order_id": 101, "user_id": 1, "total": 1200}, {"order_id": 102, "user_id": 2, "total": 25}]
+    orders_df = pd.DataFrame(o_data)
+    merged = pd.merge(orders_df, users_df, left_on="user_id", right_on="id")
+    df = merged[["order_id", "name", "total"]]
+    return df.to_dict(orient="records")
+
+#24
+@app.get("/task24")
+def task24():
+    df = pd.DataFrame(orders_data)
+    df = df[df["total"] > 1000]
+    return df.to_dict(orient="records")
+
+#25
+@app.get("/task25")
+def task25():
+    df = pd.DataFrame(orders_data)
+    grouped = df.groupby("user_name")["total"].sum().reset_index()
+    grouped = grouped.rename(columns={"total": "total_sum"})
+    return grouped.to_dict(orient="records")
+
+#26========39
+@app.get("/task26")
+def task26():
+    df = pd.DataFrame(orders_data)
+    grouped = df.groupby("user_name")["total"].mean().reset_index()
+    grouped = grouped.rename(columns={"total": "mean_total"})
+    return grouped.to_dict(orient="records")
+
+#27========40
+@app.get("/task27")
+def task27():
+    df = pd.DataFrame(orders_data)
+    grouped = df.groupby("user_name")["total"].count().reset_index()
+    grouped = grouped.rename(columns={"total": "mean_total"})
+    return grouped.to_dict(orient="records")
+
+#28
+@app.get("/task28")
+def task28():
+    data = [p.to_dict() for p in [p1, p2, p3, p4]]
+    df = pd.DataFrame(data)
+    grouped = df.groupby("category")["price"].mean().reset_index()
+    grouped = grouped.rename(columns={"price": "mean_price"})
+    return grouped.to_dict(orient="records")
+
+#29
+@app.get("/task29")
+def task29():
+    data = [p.to_dict() for p in [p1, p2, p3, p4]]
+    df = pd.DataFrame(data)
+    df["discounted_price"] = df["price"] * 0.9
+    return df.to_dict(orient="records")
+
+#30
+@app.get("/task30")
+def task30():
+    data = [p.to_dict() for p in [p1, p2, p3, p4]]
+    df = pd.DataFrame(data)
+    sorted_df = df.sort_values(by="price", ascending=False)
+    return sorted_df.to_dict(orient="records")
+
+#31
+@app.get("/task31")
+def task31():
+    data = [{"order_id": 101, "product_name": "Laptop", "price": 1200}, {"order_id": 102, "product_name": "Mouse", "price": 25}]
+    df = pd.DataFrame(data)
+    df["quantity"] = 1
+    return df.to_dict(orient="records")
+
+#32
+@app.get("/task32")
+def task32():
+    data = [{"order_id": 101, "product_name": "Laptop", "price": 1200, "quantity": 1}, {"order_id": 102, "product_name": "Mouse", "price": 25, "quantity": 2}]
+    df = pd.DataFrame(data)
+    df["total_price"] = df["price"] * df["quantity"]
+    return df.to_dict(orient="records")
+
+#33
+@app.get("/task33")
+def task33():
+    data = [p.to_dict() for p in [p1, p2, p3, p4, p5]]
+    df = pd.DataFrame(data)
+    q = df[df["category"] == "Electronics"]
+    return q.to_dict(orient="records")
+
+#34
+@app.get("/task34")
+def task34():
+    data = [p.to_dict() for p in [p1, p2, p3, p4, p5]]
+    df = pd.DataFrame(data)
+    q = df.groupby("category")["name"].count().reset_index()
+    q = q.rename(columns={"name": "count"})
+    return q.to_dict(orient="records")
+
+#35
+@app.get("/task35")
+def task35():
+    data = [p.to_dict() for p in [p1, p2, p3, p4, p5]]
+    df = pd.DataFrame(data)
+    q = df.groupby("category")["price"].mean().reset_index()
+    q = q.rename(columns={"price": "mean"})
+    return q.to_dict(orient="records")
+
+#36
+@app.get("/task36")
+def task36():
+    data = [p.to_dict() for p in [p1, p2, p3, p4, p5]]
+    df = pd.DataFrame(data)
+    q = df.sort_values(by="prise", ascending=False)
+    return q.to_dict(orient="records")
+
+#37
+@app.get("/task37")
+def task37():
+    data = [{"order_id": 101, "total_price": 1200}, {"order_id": 102, "total_price": 50}, {"order_id": 103, "total_price": 500}, {"order_id": 104, "total_price": 1500}]
+    df = pd.DataFrame(data)
+    q = df.sort_values(by="total_price", ascending=False).head(3)
+    return q.to_dict(orient="records")
+
+#41
+@app.get("/task41")
+def task41():
+    data = [{"user_name": "John", "total_price": 1200}, {"user_name": "John", "total_price": 500}, {"user_name": "Alice", "total_price": 50}]
+    df = pd.DataFrame(data)
+    q = df.groupby("user_name")["total_price"].max().reset_index()
+    q = q.rename(columns={"total_price": "max_order"})
+    return q.to_dict(orient="records")
+
+#42
+@app.get("/task42")
+def task42():
+    data = [{"user_name": "John", "category": "Electronics"}, {"user_name": "John", "category": "Electronics"}, {"user_name": "John", "category": "Clothing"}, {"user_name": "Alice", "category": "Clothing"}]
+    df = pd.DataFrame(data)
+    q = df.groupby("user_name")["category"].nunique().reset_index()
+    q = q.rename(columns={"category": "unique_categories"})
+    return q.to_dict(orient="records")
+
+#43
+@app.get("/task43")
+def task43():
+    data = [{"user_name": "John", "total_sum": 1700}, {"user_name": "Alice", "total_sum": 25}]
+    df = pd.DataFrame(data)
+    df["VIP"] = df["total_sum"] > 1000
+    return df.to_dict(orient="records")
+
+#44
+@app.get("/task44")
+def task44():
+    data = [{"user_name": "John", "total_sum": 1700, "mean_total": 850}, {"user_name": "Alice", "total_sum": 25, "mean_total": 25}, {"user_name": "Bob", "total_sum": 1700, "mean_total": 600}]
+    df = pd.DataFrame(data)
+    q = df.sort_values(by=["total_sum", "mean_total"], ascending=[False, True])
+    return q.to_dict(orient="records")
+
+#45
+@app.get("/task45")
+def task45():
+    data = [{"user_name": "John", "order_id": 101, "total_price": 1200, "category": "Electronics"}, {"user_name": "John", "order_id": 103, "total_price": 500, "category": "Clothing"}, {"user_name": "Alice", "order_id": 102, "total_price": 25, "category": "Clothing"}]
+    df = pd.DataFrame(data)
+    report = df.groupby("user_name").agg(
+        total_orders=("order_id", "count"),
+        total_sum=("total_price", "sum"),
+        mean_total=("total_price", "mean"),
+        max_order=("total_price", "max"),
+        unique_categories=("category", "nunique")
+    ).reset_index()
+    report["VIP"] = report["total_sum"] > 1000
+    report = report.sort_values(by="total_sum", ascending=False)
+    return report.to_dict(orient="records")
+
+#========================
 # uvicorn r:app --reload
+#========================
